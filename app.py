@@ -5,13 +5,13 @@ import os
 import re
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'cabanas-lacho-secret-2024')
+app.secret_key = os.environ.get('SECRET_KEY', 'cabanas-intiyaco-secret-2024')
 
 TIPO_CAMBIO = float(os.environ.get('TIPO_CAMBIO', '1200'))
 
 CABANAS = {
-    'lacho4': {
-        'nombre': 'Cabaña Lacho 4',
+    'cedro': {
+        'nombre': 'El Cedro',
         'capacidad': 4,
         'precio_usd': 100,
         'descripcion': 'Acogedora cabaña para hasta 4 personas, rodeada de naturaleza. Cuenta con cocina equipada, living comedor, 2 dormitorios y baño completo.',
@@ -19,8 +19,8 @@ CABANAS = {
         'imagen': 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=800&q=80',
         'imagen2': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
     },
-    'lacho6': {
-        'nombre': 'Cabaña Lacho 6',
+    'tabaquillo': {
+        'nombre': 'El Tabaquillo',
         'capacidad': 6,
         'precio_usd': 120,
         'descripcion': 'Espaciosa cabaña premium para hasta 6 personas, ideal para familias grandes o grupos de amigos. 3 dormitorios, 2 baños y amplias áreas de esparcimiento.',
@@ -31,10 +31,10 @@ CABANAS = {
 }
 
 RESENAS = [
-    {'nombre': 'María G.', 'estrellas': 5, 'texto': 'Increíble lugar, muy tranquilo y limpio. Volvería sin dudarlo.', 'cabana': 'lacho4'},
-    {'nombre': 'Carlos P.', 'estrellas': 5, 'texto': 'La cabaña estaba perfecta. El entorno es hermoso, ideal para desconectarse.', 'cabana': 'lacho6'},
-    {'nombre': 'Laura M.', 'estrellas': 4, 'texto': 'Muy buena experiencia, excelente atención y todo muy cómodo.', 'cabana': 'lacho4'},
-    {'nombre': 'Roberto S.', 'estrellas': 5, 'texto': 'Fuimos 6 amigos y quedamos encantados. La pileta y el quincho son un lujo.', 'cabana': 'lacho6'},
+    {'nombre': 'María G.', 'estrellas': 5, 'texto': 'Increíble lugar, muy tranquilo y limpio. Volvería sin dudarlo.', 'cabana': 'cedro'},
+    {'nombre': 'Carlos P.', 'estrellas': 5, 'texto': 'La cabaña estaba perfecta. El entorno es hermoso, ideal para desconectarse.', 'cabana': 'tabaquillo'},
+    {'nombre': 'Laura M.', 'estrellas': 4, 'texto': 'Muy buena experiencia, excelente atención y todo muy cómodo.', 'cabana': 'cedro'},
+    {'nombre': 'Roberto S.', 'estrellas': 5, 'texto': 'Fuimos 6 amigos y quedamos encantados. La pileta y el quincho son un lujo.', 'cabana': 'tabaquillo'},
 ]
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -243,9 +243,17 @@ def admin_panel():
     pendientes = conn.execute("SELECT COUNT(*) FROM reservas WHERE estado = 'pendiente'").fetchone()[0]
     confirmadas = conn.execute("SELECT COUNT(*) FROM reservas WHERE estado = 'confirmada'").fetchone()[0]
     conn.close()
+    # Pasar todas las reservas como JSON para el calendario
+    import json as _json
+    conn2 = get_db()
+    todas_reservas_raw = conn2.execute('SELECT cabana_id, nombre, apellido, fecha_ingreso, fecha_salida, noches, estado FROM reservas').fetchall()
+    conn2.close()
+    reservas_json = _json.dumps([dict(r) for r in todas_reservas_raw])
+
     return render_template('admin.html', reservas=reservas, cabanas=CABANAS,
                            total_usd=total_usd, pendientes=pendientes,
-                           confirmadas=confirmadas, filtro=filtro, cabana_f=cabana_f)
+                           confirmadas=confirmadas, filtro=filtro, cabana_f=cabana_f,
+                           reservas_json=reservas_json)
 
 
 @app.route('/admin/accion/<int:reserva_id>/<accion>', methods=['POST'])
