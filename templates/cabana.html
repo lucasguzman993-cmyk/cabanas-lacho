@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}{{ cabana.nombre }} — Cabañas Lacho{% endblock %}
+{% block extra_css %}
+<style>
+    .cabana-hero { position:relative; height:450px; overflow:hidden; }
+    .cabana-hero img { width:100%; height:100%; object-fit:cover; }
+    .cabana-hero-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%); }
+    .cabana-hero-title { position:absolute; bottom:2rem; left:2rem; color:white; }
+    .cabana-hero-title h1 { font-family:'Playfair Display',serif; font-size:2.5rem; }
+    .cabana-hero-title .badge-cap { background:var(--verde-claro); color:white; padding:0.3rem 0.85rem; border-radius:20px; font-size:0.85rem; font-weight:600; }
+
+    .cabana-content { max-width:1100px; margin:0 auto; padding:3rem 2rem; display:grid; grid-template-columns:2fr 1fr; gap:3rem; }
+    .desc-section h2 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--verde-oscuro); margin-bottom:1rem; }
+    .desc-text { color:var(--gris); line-height:1.8; font-size:0.95rem; margin-bottom:2rem; }
+    .amenities-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:2rem; }
+    .amenity-item { display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; color:var(--texto); }
+    .amenity-item::before { content:'✓'; color:var(--verde-claro); font-weight:700; }
+    .img-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:2rem; }
+    .img-grid img { width:100%; height:160px; object-fit:cover; border-radius:10px; }
+
+    .reserva-box { background:white; border-radius:16px; padding:2rem; box-shadow:var(--sombra); position:sticky; top:90px; height:fit-content; }
+    .precio-box { text-align:center; margin-bottom:1.5rem; padding-bottom:1.5rem; border-bottom:1px solid #e9ecef; }
+    .precio-usd { font-size:2.5rem; font-weight:700; color:var(--verde); }
+    .precio-ars { font-size:1rem; color:var(--gris); }
+    .precio-noche { font-size:0.85rem; color:var(--gris); }
+    .reserva-box .btn { width:100%; margin-top:1rem; display:block; text-align:center; }
+
+    .resenas-section { margin-top:2rem; }
+    .resena-item { background:#f8f9fa; padding:1.25rem; border-radius:10px; margin-bottom:1rem; }
+    .resena-stars { color:#f59e0b; margin-bottom:0.4rem; }
+    .resena-text { font-style:italic; color:var(--gris); font-size:0.9rem; margin-bottom:0.4rem; }
+    .resena-name { font-weight:600; font-size:0.85rem; color:var(--verde); }
+
+    @media(max-width:768px) {
+        .cabana-content { grid-template-columns:1fr; }
+        .reserva-box { position:static; }
+        .cabana-hero { height:280px; }
+        .cabana-hero-title h1 { font-size:1.75rem; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="cabana-hero">
+    <img src="{{ cabana.imagen }}" alt="{{ cabana.nombre }}">
+    <div class="cabana-hero-overlay"></div>
+    <div class="cabana-hero-title">
+        <span class="badge-cap">👥 Hasta {{ cabana.capacidad }} personas</span>
+        <h1>{{ cabana.nombre }}</h1>
+    </div>
+</div>
+
+<div class="cabana-content">
+    <div class="desc-section">
+        <h2>Sobre esta cabaña</h2>
+        <div class="desc-text">{{ cabana.descripcion }}</div>
+
+        <div class="img-grid">
+            <img src="{{ cabana.imagen }}" alt="Vista 1">
+            <img src="{{ cabana.imagen2 }}" alt="Vista 2">
+        </div>
+
+        <h2>Servicios incluidos</h2>
+        <div class="amenities-grid">
+            {% for a in cabana.amenities %}
+            <div class="amenity-item">{{ a }}</div>
+            {% endfor %}
+        </div>
+
+        {% if resenas %}
+        <div class="resenas-section">
+            <h2>Reseñas de huéspedes</h2>
+            {% for r in resenas %}
+            <div class="resena-item">
+                <div class="resena-stars">{{ '⭐' * r.estrellas }}</div>
+                <div class="resena-text">"{{ r.texto }}"</div>
+                <div class="resena-name">— {{ r.nombre }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <div class="reserva-box">
+            <div class="precio-box">
+                <div class="precio-usd">${{ cabana.precio_usd }} USD</div>
+                <div class="precio-ars">≈ ${{ (cabana.precio_usd * tipo_cambio)|int|string }} ARS</div>
+                <div class="precio-noche">por noche</div>
+            </div>
+            <p style="font-size:0.88rem;color:var(--gris);margin-bottom:1rem;text-align:center;">Se requiere 50% de depósito para confirmar</p>
+            <a href="/reservar/{{ cabana_id }}" class="btn btn-primary">Reservar esta cabaña</a>
+            <a href="/" class="btn btn-outline" style="margin-top:0.5rem;">Ver otras cabañas</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

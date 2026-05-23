@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Cabañas Lacho — Tu escapada perfecta en Córdoba{% endblock %}
+{% block extra_css %}
+<style>
+    .hero { background:linear-gradient(135deg, var(--verde-oscuro) 0%, var(--verde) 100%); color:white; padding:6rem 2rem; text-align:center; position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background:url('https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?w=1400&q=60') center/cover; opacity:0.2; }
+    .hero-content { position:relative; max-width:700px; margin:0 auto; }
+    .hero h1 { font-family:'Playfair Display',serif; font-size:3rem; margin-bottom:1rem; line-height:1.2; }
+    .hero p { font-size:1.15rem; opacity:0.9; margin-bottom:2rem; line-height:1.6; }
+    .hero-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    .btn-hero { background:white; color:var(--verde-oscuro); padding:0.85rem 2.5rem; border-radius:30px; font-weight:700; font-size:1rem; transition:all 0.2s; }
+    .btn-hero:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(0,0,0,0.2); }
+    .btn-hero-outline { background:transparent; color:white; border:2px solid white; padding:0.85rem 2.5rem; border-radius:30px; font-weight:600; transition:all 0.2s; }
+    .btn-hero-outline:hover { background:white; color:var(--verde-oscuro); }
+
+    .section { max-width:1200px; margin:0 auto; padding:4rem 2rem; }
+    .section-title { font-family:'Playfair Display',serif; font-size:2rem; color:var(--verde-oscuro); margin-bottom:0.5rem; }
+    .section-sub { color:var(--gris); margin-bottom:3rem; font-size:0.95rem; }
+
+    .cabanas-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; }
+    .cabana-card { background:white; border-radius:16px; overflow:hidden; box-shadow:var(--sombra); transition:transform 0.2s, box-shadow 0.2s; }
+    .cabana-card:hover { transform:translateY(-4px); box-shadow:0 12px 35px rgba(0,0,0,0.12); }
+    .cabana-img { width:100%; height:260px; object-fit:cover; }
+    .cabana-body { padding:1.75rem; }
+    .cabana-badge { display:inline-block; background:var(--verde-claro); color:white; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.78rem; font-weight:600; margin-bottom:0.75rem; }
+    .cabana-nombre { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--verde-oscuro); margin-bottom:0.5rem; }
+    .cabana-desc { color:var(--gris); font-size:0.9rem; line-height:1.6; margin-bottom:1.25rem; }
+    .cabana-precio { font-size:1.5rem; font-weight:700; color:var(--verde); margin-bottom:1.25rem; }
+    .cabana-precio span { font-size:0.85rem; font-weight:400; color:var(--gris); }
+    .cabana-btns { display:flex; gap:0.75rem; }
+
+    .features { background:white; padding:4rem 2rem; }
+    .features-inner { max-width:1200px; margin:0 auto; }
+    .features-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2rem; margin-top:3rem; }
+    .feature-item { text-align:center; }
+    .feature-icon { font-size:2.5rem; margin-bottom:1rem; }
+    .feature-title { font-weight:600; font-size:1rem; color:var(--verde-oscuro); margin-bottom:0.5rem; }
+    .feature-desc { color:var(--gris); font-size:0.88rem; line-height:1.5; }
+
+    .resenas-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.5rem; }
+    .resena-card { background:white; padding:1.5rem; border-radius:12px; box-shadow:var(--sombra); }
+    .resena-estrellas { color:#f59e0b; font-size:1.1rem; margin-bottom:0.5rem; }
+    .resena-texto { color:var(--texto); font-size:0.9rem; line-height:1.6; font-style:italic; margin-bottom:0.75rem; }
+    .resena-autor { font-weight:600; font-size:0.85rem; color:var(--verde); }
+
+    .cta { background:linear-gradient(135deg, var(--verde) 0%, var(--verde-oscuro) 100%); color:white; text-align:center; padding:5rem 2rem; }
+    .cta h2 { font-family:'Playfair Display',serif; font-size:2.2rem; margin-bottom:1rem; }
+    .cta p { opacity:0.9; margin-bottom:2rem; font-size:1rem; }
+
+    @media(max-width:768px) {
+        .hero h1 { font-size:2rem; }
+        .cabanas-grid { grid-template-columns:1fr; }
+        .features-grid { grid-template-columns:repeat(2,1fr); }
+        .resenas-grid { grid-template-columns:1fr; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <h1>Tu escapada perfecta en la naturaleza</h1>
+        <p>Cabañas Lacho te ofrece el descanso que merecés. Dos cabañas únicas rodeadas de naturaleza, con todo el confort para hacer tu estadía inolvidable.</p>
+        <div class="hero-btns">
+            <a href="/cabana/lacho4" class="btn-hero">Ver cabañas</a>
+            <a href="/reservar/lacho4" class="btn-hero-outline">Reservar ahora</a>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">Nuestras Cabañas</div>
+    <p class="section-sub">Elegí la cabaña ideal para tu grupo</p>
+    <div class="cabanas-grid">
+        {% for id, cabana in cabanas.items() %}
+        <div class="cabana-card">
+            <img src="{{ cabana.imagen }}" alt="{{ cabana.nombre }}" class="cabana-img">
+            <div class="cabana-body">
+                <span class="cabana-badge">👥 Hasta {{ cabana.capacidad }} personas</span>
+                <div class="cabana-nombre">{{ cabana.nombre }}</div>
+                <div class="cabana-desc">{{ cabana.descripcion }}</div>
+                <div class="cabana-precio">${{ cabana.precio_usd }} USD <span>/ noche</span></div>
+                <div class="cabana-btns">
+                    <a href="/cabana/{{ id }}" class="btn btn-outline btn-sm">Ver detalles</a>
+                    <a href="/reservar/{{ id }}" class="btn btn-primary btn-sm">Reservar</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="features">
+    <div class="features-inner">
+        <div style="text-align:center">
+            <div class="section-title">¿Por qué elegirnos?</div>
+            <p class="section-sub">Todo lo que necesitás para una estadía perfecta</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">🌿</div>
+                <div class="feature-title">Naturaleza pura</div>
+                <div class="feature-desc">Rodeadas de paisajes naturales únicos de Córdoba</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-title">Reserva segura</div>
+                <div class="feature-desc">Sistema de reservas online rápido y confiable</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🍖</div>
+                <div class="feature-title">Parrilla incluida</div>
+                <div class="feature-desc">Todas las cabañas cuentan con parrilla propia</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📶</div>
+                <div class="feature-title">WiFi de alta velocidad</div>
+                <div class="feature-desc">Conectividad para trabajar o descansar</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="section-title">Lo que dicen nuestros huéspedes</div>
+    <p class="section-sub">Más de 100 familias ya disfrutaron de Cabañas Lacho</p>
+    <div class="resenas-grid">
+        {% for r in resenas %}
+        <div class="resena-card">
+            <div class="resena-estrellas">{{ '⭐' * r.estrellas }}</div>
+            <div class="resena-texto">"{{ r.texto }}"</div>
+            <div class="resena-autor">— {{ r.nombre }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="cta">
+    <h2>¿Listo para tu próxima aventura?</h2>
+    <p>Reservá hoy y asegurá tu lugar en Cabañas Lacho</p>
+    <a href="/reservar/lacho4" class="btn" style="background:white;color:var(--verde-oscuro);font-weight:700;font-size:1rem;">Hacer mi reserva</a>
+</div>
+{% endblock %}

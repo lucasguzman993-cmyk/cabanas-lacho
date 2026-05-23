@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}Reservar {{ cabana.nombre }} — Cabañas Lacho{% endblock %}
+{% block extra_css %}
+<style>
+    .reservar-wrap { max-width:900px; margin:3rem auto; padding:0 1.5rem; display:grid; grid-template-columns:3fr 2fr; gap:2.5rem; }
+    .form-card { background:white; border-radius:16px; padding:2.5rem; box-shadow:var(--sombra); }
+    .form-card h2 { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--verde-oscuro); margin-bottom:0.5rem; }
+    .form-sub { color:var(--gris); font-size:0.9rem; margin-bottom:2rem; }
+    .form-group { margin-bottom:1.25rem; }
+    .form-group label { display:block; font-weight:500; font-size:0.88rem; color:var(--texto); margin-bottom:0.4rem; }
+    .form-group label span { color:#dc3545; }
+    .form-control { width:100%; padding:0.7rem 1rem; border:1.5px solid #dee2e6; border-radius:8px; font-size:0.92rem; font-family:'Inter',sans-serif; transition:border-color 0.2s; background:white; }
+    .form-control:focus { outline:none; border-color:var(--verde-claro); box-shadow:0 0 0 3px rgba(82,183,136,0.15); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .form-hint { font-size:0.78rem; color:var(--gris); margin-top:0.25rem; }
+    .moneda-selector { display:flex; gap:0.75rem; }
+    .moneda-btn { flex:1; padding:0.65rem; border:1.5px solid #dee2e6; border-radius:8px; background:white; cursor:pointer; font-size:0.9rem; font-weight:500; transition:all 0.15s; text-align:center; }
+    .moneda-btn.active { border-color:var(--verde); color:var(--verde); background:rgba(82,183,136,0.08); }
+    .btn-submit { width:100%; padding:1rem; background:var(--verde); color:white; border:none; border-radius:30px; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.2s; margin-top:0.5rem; }
+    .btn-submit:hover { background:var(--verde-oscuro); transform:translateY(-1px); box-shadow:0 6px 20px rgba(45,106,79,0.3); }
+
+    .resumen-card { background:white; border-radius:16px; padding:2rem; box-shadow:var(--sombra); position:sticky; top:90px; height:fit-content; }
+    .resumen-img { width:100%; height:160px; object-fit:cover; border-radius:10px; margin-bottom:1.25rem; }
+    .resumen-nombre { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--verde-oscuro); margin-bottom:0.25rem; }
+    .resumen-cap { font-size:0.85rem; color:var(--gris); margin-bottom:1.25rem; }
+    .resumen-row { display:flex; justify-content:space-between; font-size:0.9rem; padding:0.5rem 0; border-bottom:1px solid #f1f3f5; }
+    .resumen-row:last-child { border-bottom:none; font-weight:700; color:var(--verde); font-size:1rem; }
+    .precio-dinamico { font-size:1.5rem; font-weight:700; color:var(--verde); margin:1rem 0; text-align:center; }
+
+    @media(max-width:768px) {
+        .reservar-wrap { grid-template-columns:1fr; }
+        .resumen-card { position:static; }
+        .form-row { grid-template-columns:1fr; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="reservar-wrap">
+    <div class="form-card">
+        <h2>Reservar {{ cabana.nombre }}</h2>
+        <p class="form-sub">Completá el formulario para asegurar tu lugar</p>
+
+        {% if error %}
+        <div class="alert alert-error">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="/reservar/{{ cabana_id }}" onsubmit="return validarFormulario()">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre <span>*</span></label>
+                    <input type="text" name="nombre" class="form-control" placeholder="Tu nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Apellido <span>*</span></label>
+                    <input type="text" name="apellido" class="form-control" placeholder="Tu apellido" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>DNI / Documento <span>*</span></label>
+                <input type="text" name="dni" class="form-control" placeholder="Solo números, sin puntos" pattern="[0-9]{7,9}" required>
+                <div class="form-hint">Solo números, entre 7 y 9 dígitos</div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" name="telefono" class="form-control" placeholder="Ej: 351 1234567">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha de ingreso <span>*</span></label>
+                    <input type="date" name="fecha_ingreso" id="fecha_ingreso" class="form-control" min="{{ hoy }}" required onchange="calcularPrecio()">
+                </div>
+                <div class="form-group">
+                    <label>Fecha de salida <span>*</span></label>
+                    <input type="date" name="fecha_salida" id="fecha_salida" class="form-control" min="{{ hoy }}" required onchange="calcularPrecio()">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Moneda de pago <span>*</span></label>
+                <div class="moneda-selector">
+                    <button type="button" class="moneda-btn active" id="btn-usd" onclick="selMoneda('USD')">🇺🇸 USD (Dólares)</button>
+                    <button type="button" class="moneda-btn" id="btn-ars" onclick="selMoneda('ARS')">🇦🇷 ARS (Pesos)</button>
+                </div>
+                <input type="hidden" name="moneda" id="moneda" value="USD">
+            </div>
+            <button type="submit" class="btn-submit">Confirmar Reserva →</button>
+        </form>
+    </div>
+
+    <div>
+        <div class="resumen-card">
+            <img src="{{ cabana.imagen }}" alt="{{ cabana.nombre }}" class="resumen-img">
+            <div class="resumen-nombre">{{ cabana.nombre }}</div>
+            <div class="resumen-cap">👥 Hasta {{ cabana.capacidad }} personas</div>
+            <div class="resumen-row"><span>Precio por noche</span><span>${{ cabana.precio_usd }} USD</span></div>
+            <div class="resumen-row"><span>Noches</span><span id="res-noches">—</span></div>
+            <div class="resumen-row"><span>Depósito (50%)</span><span id="res-deposito">—</span></div>
+            <div class="resumen-row"><span>Total</span><span id="res-total">—</span></div>
+            <div class="precio-dinamico" id="precio-display">Seleccioná fechas</div>
+        </div>
+    </div>
+</div>
+
+<script>
+var precioPorNoche = {{ cabana.precio_usd }};
+var tipoCambio = {{ tipo_cambio }};
+var monedaActual = 'USD';
+
+function selMoneda(m) {
+    monedaActual = m;
+    document.getElementById('moneda').value = m;
+    document.getElementById('btn-usd').classList.toggle('active', m === 'USD');
+    document.getElementById('btn-ars').classList.toggle('active', m === 'ARS');
+    calcularPrecio();
+}
+
+function calcularPrecio() {
+    var ing = document.getElementById('fecha_ingreso').value;
+    var sal = document.getElementById('fecha_salida').value;
+    if (!ing || !sal) return;
+    var d1 = new Date(ing), d2 = new Date(sal);
+    var noches = Math.round((d2 - d1) / 86400000);
+    if (noches <= 0) { document.getElementById('precio-display').textContent = 'Fechas inválidas'; return; }
+    var totalUSD = noches * precioPorNoche;
+    var depUSD = totalUSD * 0.5;
+    document.getElementById('res-noches').textContent = noches + ' noche' + (noches > 1 ? 's' : '');
+    if (monedaActual === 'USD') {
+        document.getElementById('res-deposito').textContent = '$' + depUSD.toFixed(0) + ' USD';
+        document.getElementById('res-total').textContent = '$' + totalUSD.toFixed(0) + ' USD';
+        document.getElementById('precio-display').textContent = '$' + totalUSD.toFixed(0) + ' USD';
+    } else {
+        var totalARS = totalUSD * tipoCambio;
+        var depARS = depUSD * tipoCambio;
+        document.getElementById('res-deposito').textContent = '$' + Math.round(depARS).toLocaleString() + ' ARS';
+        document.getElementById('res-total').textContent = '$' + Math.round(totalARS).toLocaleString() + ' ARS';
+        document.getElementById('precio-display').textContent = '$' + Math.round(totalARS).toLocaleString() + ' ARS';
+    }
+}
+
+function validarFormulario() {
+    var dni = document.querySelector('[name=dni]').value.replace(/[\.\-\s]/g,'');
+    if (!/^\d{7,9}$/.test(dni)) {
+        alert('El DNI debe contener solo números (7 a 9 dígitos), sin puntos ni guiones.');
+        return false;
+    }
+    var ing = new Date(document.getElementById('fecha_ingreso').value);
+    var sal = new Date(document.getElementById('fecha_salida').value);
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
+    if (ing < hoy) { alert('La fecha de ingreso no puede ser en el pasado.'); return false; }
+    if (sal <= ing) { alert('La fecha de salida debe ser posterior al ingreso.'); return false; }
+    return true;
+}
+</script>
+{% endblock %}

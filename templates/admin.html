@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin — Cabañas Lacho</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --verde:#2d6a4f; --verde-claro:#52b788; --arena:#f8f4ed; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#f0f2f5; }
+        .topbar { background:var(--verde); color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .topbar h1 { font-size:1.2rem; font-weight:700; }
+        .topbar a { color:rgba(255,255,255,0.8); font-size:0.85rem; text-decoration:none; }
+        .topbar a:hover { color:white; }
+        .content { max-width:1300px; margin:0 auto; padding:2rem; }
+
+        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:2rem; }
+        .stat-card { background:white; border-radius:12px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        .stat-label { font-size:0.78rem; text-transform:uppercase; color:#6c757d; letter-spacing:0.5px; margin-bottom:0.4rem; }
+        .stat-val { font-size:2rem; font-weight:700; color:var(--verde); }
+        .stat-val.naranja { color:#f59e0b; }
+        .stat-val.rojo { color:#dc3545; }
+
+        .filtros { background:white; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+        .filtros a { padding:0.4rem 1rem; border-radius:20px; font-size:0.85rem; font-weight:500; color:#6c757d; text-decoration:none; border:1px solid #dee2e6; transition:all 0.15s; }
+        .filtros a.active, .filtros a:hover { background:var(--verde); color:white; border-color:var(--verde); }
+        .filtros span { color:#6c757d; font-size:0.85rem; margin-left:auto; }
+
+        .tabla-card { background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden; }
+        table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+        th { background:#f8f9fa; color:#495057; font-weight:600; padding:0.85rem 1rem; text-align:left; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.3px; border-bottom:1px solid #dee2e6; }
+        td { padding:0.9rem 1rem; border-bottom:1px solid #f1f3f5; vertical-align:middle; }
+        tr:hover td { background:#f8fffe; }
+        tr:last-child td { border-bottom:none; }
+
+        .badge { display:inline-block; padding:0.25rem 0.6rem; border-radius:20px; font-size:0.75rem; font-weight:600; }
+        .badge-pendiente { background:#fff3cd; color:#856404; }
+        .badge-confirmada { background:#d1e7dd; color:#0a3622; }
+        .badge-cancelada { background:#f8d7da; color:#58151c; }
+        .badge-usd { background:#e0f0ff; color:#1a4a7a; }
+        .badge-ars { background:#e8f5e9; color:#1b5e20; }
+        .badge-pago { background:#d1e7dd; color:#0a3622; font-size:0.7rem; }
+
+        .acciones { display:flex; gap:0.4rem; flex-wrap:wrap; }
+        .btn-accion { padding:0.3rem 0.65rem; border:none; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; text-decoration:none; display:inline-block; }
+        .btn-confirmar { background:#d1e7dd; color:#0a3622; }
+        .btn-confirmar:hover { background:#a3cfbb; }
+        .btn-cancelar { background:#f8d7da; color:#58151c; }
+        .btn-cancelar:hover { background:#f1aeb5; }
+        .btn-deposito { background:#fff3cd; color:#856404; }
+        .btn-deposito:hover { background:#ffeaa7; }
+
+        .notas-form { display:flex; gap:0.4rem; margin-top:0.4rem; }
+        .notas-form input { flex:1; padding:0.3rem 0.6rem; border:1px solid #dee2e6; border-radius:6px; font-size:0.78rem; }
+        .notas-form button { padding:0.3rem 0.6rem; background:var(--verde); color:white; border:none; border-radius:6px; font-size:0.75rem; cursor:pointer; }
+        .notas-text { font-size:0.78rem; color:#6c757d; font-style:italic; }
+
+        .empty { text-align:center; padding:3rem; color:#6c757d; }
+        @media(max-width:768px) {
+            .stats-row { grid-template-columns:repeat(2,1fr); }
+            .content { padding:1rem; }
+            .tabla-card { overflow-x:auto; }
+        }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <h1>🏕️ Panel Admin — Cabañas Lacho</h1>
+    <div style="display:flex;gap:1.5rem;align-items:center;">
+        <a href="/" target="_blank">Ver sitio →</a>
+        <a href="/admin/logout">Cerrar sesión</a>
+    </div>
+</div>
+
+<div class="content">
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Total facturado</div>
+            <div class="stat-val">${{ total_usd|int }} USD</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Reservas pendientes</div>
+            <div class="stat-val naranja">{{ pendientes }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Reservas confirmadas</div>
+            <div class="stat-val">{{ confirmadas }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total reservas</div>
+            <div class="stat-val">{{ reservas|length }}</div>
+        </div>
+    </div>
+
+    <div class="filtros">
+        <a href="/admin?filtro=todas&cabana={{ cabana_f }}" class="{{ 'active' if filtro=='todas' else '' }}">Todas</a>
+        <a href="/admin?filtro=pendientes&cabana={{ cabana_f }}" class="{{ 'active' if filtro=='pendientes' else '' }}">Pendientes</a>
+        <a href="/admin?filtro=confirmadas&cabana={{ cabana_f }}" class="{{ 'active' if filtro=='confirmadas' else '' }}">Confirmadas</a>
+        <a href="/admin?filtro=canceladas&cabana={{ cabana_f }}" class="{{ 'active' if filtro=='canceladas' else '' }}">Canceladas</a>
+        &nbsp;|&nbsp;
+        <a href="/admin?filtro={{ filtro }}&cabana=todas" class="{{ 'active' if cabana_f=='todas' else '' }}">Ambas cabañas</a>
+        {% for id, cab in cabanas.items() %}
+        <a href="/admin?filtro={{ filtro }}&cabana={{ id }}" class="{{ 'active' if cabana_f==id else '' }}">{{ cab.nombre }}</a>
+        {% endfor %}
+        <span>{{ reservas|length }} resultado(s)</span>
+    </div>
+
+    <div class="tabla-card">
+        {% if reservas %}
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Cabaña</th>
+                    <th>Huésped</th>
+                    <th>DNI</th>
+                    <th>Fechas</th>
+                    <th>Noches</th>
+                    <th>Total</th>
+                    <th>Moneda</th>
+                    <th>Estado</th>
+                    <th>Depósito</th>
+                    <th>Acciones</th>
+                    <th>Notas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reservas %}
+                <tr>
+                    <td><strong>#{{ r['id'] }}</strong></td>
+                    <td>{{ cabanas[r['cabana_id']]['nombre'] if r['cabana_id'] in cabanas else r['cabana_id'] }}</td>
+                    <td>
+                        <strong>{{ r['nombre'] }} {{ r['apellido'] }}</strong>
+                        {% if r['email'] %}<br><small style="color:#6c757d">{{ r['email'] }}</small>{% endif %}
+                        {% if r['telefono'] %}<br><small style="color:#6c757d">{{ r['telefono'] }}</small>{% endif %}
+                    </td>
+                    <td>{{ r['dni'] }}</td>
+                    <td>{{ r['fecha_ingreso'] }}<br>→ {{ r['fecha_salida'] }}</td>
+                    <td style="text-align:center">{{ r['noches'] }}</td>
+                    <td>
+                        <strong>${{ r['total_usd']|int }} USD</strong><br>
+                        <small style="color:#6c757d">${{ r['total_ars']|int }} ARS</small>
+                    </td>
+                    <td><span class="badge {{ 'badge-usd' if r['moneda']=='USD' else 'badge-ars' }}">{{ r['moneda'] }}</span></td>
+                    <td>
+                        <span class="badge badge-{{ r['estado'] }}">{{ r['estado'].upper() }}</span>
+                    </td>
+                    <td style="text-align:center">
+                        {% if r['pago_deposito'] %}
+                        <span class="badge badge-pago">✓ Pagado</span>
+                        {% else %}
+                        <span style="color:#dc3545;font-size:0.78rem">Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="acciones">
+                            {% if r['estado'] == 'pendiente' %}
+                            <form method="POST" action="/admin/accion/{{ r['id'] }}/confirmar" style="display:inline">
+                                <button type="submit" class="btn-accion btn-confirmar">✓ Confirmar</button>
+                            </form>
+                            {% endif %}
+                            {% if r['estado'] != 'cancelada' %}
+                            <form method="POST" action="/admin/accion/{{ r['id'] }}/cancelar" style="display:inline" onsubmit="return confirm('¿Cancelar esta reserva?')">
+                                <button type="submit" class="btn-accion btn-cancelar">✗ Cancelar</button>
+                            </form>
+                            {% endif %}
+                            {% if not r['pago_deposito'] %}
+                            <form method="POST" action="/admin/accion/{{ r['id'] }}/pago_deposito" style="display:inline">
+                                <button type="submit" class="btn-accion btn-deposito">💰 Dep. pagado</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="min-width:160px">
+                        {% if r['notas'] %}
+                        <div class="notas-text">{{ r['notas'] }}</div>
+                        {% endif %}
+                        <form method="POST" action="/admin/notas/{{ r['id'] }}" class="notas-form">
+                            <input type="text" name="notas" placeholder="Agregar nota..." value="{{ r['notas'] or '' }}">
+                            <button type="submit">💾</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty">📋 No hay reservas para mostrar</div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

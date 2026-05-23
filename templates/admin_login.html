@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Cabañas Lacho</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --verde:#2d6a4f; --verde-claro:#52b788; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#f0f2f5; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+        .login-card { background:white; border-radius:16px; padding:2.5rem; width:100%; max-width:380px; box-shadow:0 8px 30px rgba(0,0,0,0.1); }
+        .login-icon { text-align:center; font-size:3rem; margin-bottom:1rem; }
+        h2 { text-align:center; font-size:1.4rem; color:var(--verde); margin-bottom:0.25rem; }
+        .sub { text-align:center; color:#6c757d; font-size:0.85rem; margin-bottom:2rem; }
+        .field { margin-bottom:1.25rem; }
+        label { display:block; font-size:0.85rem; font-weight:500; margin-bottom:0.4rem; color:#333; }
+        input { width:100%; padding:0.7rem 1rem; border:1.5px solid #dee2e6; border-radius:8px; font-size:0.92rem; font-family:'Inter',sans-serif; }
+        input:focus { outline:none; border-color:var(--verde-claro); }
+        .btn { width:100%; padding:0.85rem; background:var(--verde); color:white; border:none; border-radius:30px; font-size:1rem; font-weight:600; cursor:pointer; }
+        .btn:hover { background:#1b4332; }
+        .error { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:0.75rem 1rem; border-radius:8px; font-size:0.88rem; margin-bottom:1rem; }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h2>Panel Administrador</h2>
+    <p class="sub">Cabañas Lacho</p>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="POST">
+        <div class="field"><label>Usuario</label><input type="text" name="usuario" required autofocus></div>
+        <div class="field"><label>Contraseña</label><input type="password" name="password" required></div>
+        <button type="submit" class="btn">Ingresar</button>
+    </form>
+</div>
+</body>
+</html>

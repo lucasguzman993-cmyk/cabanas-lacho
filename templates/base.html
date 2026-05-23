@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cabañas Lacho{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --verde: #2d6a4f; --verde-claro: #52b788; --verde-oscuro: #1b4332;
+            --arena: #f8f4ed; --madera: #8b5e3c; --texto: #2c2c2c; --gris: #6c757d;
+            --blanco: #ffffff; --sombra: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; color:var(--texto); background:var(--arena); }
+        a { text-decoration:none; color:inherit; }
+
+        /* NAV */
+        nav { background:var(--blanco); box-shadow:var(--sombra); position:sticky; top:0; z-index:100; }
+        .nav-inner { max-width:1200px; margin:0 auto; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .nav-brand { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--verde-oscuro); font-weight:700; }
+        .nav-brand span { color:var(--verde-claro); }
+        .nav-links { display:flex; gap:2rem; align-items:center; }
+        .nav-links a { font-size:0.9rem; font-weight:500; color:var(--gris); transition:color 0.2s; }
+        .nav-links a:hover { color:var(--verde); }
+        .btn-reservar-nav { background:var(--verde); color:var(--blanco)!important; padding:0.5rem 1.25rem; border-radius:25px; font-weight:600!important; transition:background 0.2s!important; }
+        .btn-reservar-nav:hover { background:var(--verde-oscuro)!important; }
+
+        /* BUTTONS */
+        .btn { display:inline-block; padding:0.75rem 2rem; border-radius:30px; font-weight:600; font-size:0.95rem; cursor:pointer; border:none; transition:all 0.2s; text-align:center; }
+        .btn-primary { background:var(--verde); color:var(--blanco); }
+        .btn-primary:hover { background:var(--verde-oscuro); transform:translateY(-1px); box-shadow:0 6px 20px rgba(45,106,79,0.3); }
+        .btn-outline { background:transparent; color:var(--verde); border:2px solid var(--verde); }
+        .btn-outline:hover { background:var(--verde); color:var(--blanco); }
+        .btn-danger { background:#dc3545; color:var(--blanco); }
+        .btn-danger:hover { background:#b02a37; }
+        .btn-success { background:#198754; color:var(--blanco); }
+        .btn-sm { padding:0.4rem 1rem; font-size:0.82rem; }
+
+        /* FOOTER */
+        footer { background:var(--verde-oscuro); color:rgba(255,255,255,0.8); text-align:center; padding:2rem; margin-top:4rem; font-size:0.88rem; }
+        footer strong { color:var(--verde-claro); }
+
+        /* ALERTS */
+        .alert { padding:0.85rem 1.25rem; border-radius:8px; margin-bottom:1rem; font-size:0.9rem; }
+        .alert-error { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; }
+        .alert-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+        .alert-warning { background:#fffbeb; border:1px solid #fde68a; color:#92400e; }
+
+        @media(max-width:768px) {
+            .nav-inner { padding:0.75rem 1rem; }
+            .nav-links { gap:1rem; }
+            .nav-links a:not(.btn-reservar-nav) { display:none; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+<nav>
+    <div class="nav-inner">
+        <a href="/" class="nav-brand">🏕️ Cabañas <span>Lacho</span></a>
+        <div class="nav-links">
+            <a href="/">Inicio</a>
+            <a href="/cabana/lacho4">Cabaña 4 personas</a>
+            <a href="/cabana/lacho6">Cabaña 6 personas</a>
+            <a href="/reservar/lacho4" class="btn-reservar-nav">Reservar ahora</a>
+        </div>
+    </div>
+</nav>
+{% block content %}{% endblock %}
+<footer>
+    <p>© 2024 <strong>Cabañas Lacho</strong> · Córdoba, Argentina · Todos los derechos reservados</p>
+</footer>
+</body>
+</html>

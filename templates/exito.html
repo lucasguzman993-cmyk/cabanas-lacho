@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Reserva Confirmada — Cabañas Lacho{% endblock %}
+{% block extra_css %}
+<style>
+    .exito-wrap { max-width:650px; margin:4rem auto; padding:0 1.5rem; }
+    .exito-card { background:white; border-radius:20px; padding:3rem; box-shadow:var(--sombra); text-align:center; border-top:6px solid var(--verde-claro); }
+    .check-icon { font-size:4rem; margin-bottom:1rem; }
+    .exito-titulo { font-family:'Playfair Display',serif; font-size:2rem; color:var(--verde-oscuro); margin-bottom:0.5rem; }
+    .exito-sub { color:var(--gris); margin-bottom:2.5rem; line-height:1.6; }
+    .detalle-card { background:#f8fffe; border:1px solid #c3e6cb; border-radius:12px; padding:1.75rem; text-align:left; margin-bottom:2rem; }
+    .detalle-row { display:flex; justify-content:space-between; align-items:center; padding:0.65rem 0; border-bottom:1px solid #e9f5ec; font-size:0.92rem; }
+    .detalle-row:last-child { border-bottom:none; font-weight:700; font-size:1.05rem; color:var(--verde); }
+    .detalle-label { color:var(--gris); }
+    .detalle-val { font-weight:500; color:var(--texto); }
+    .alerta-deposito { background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:1rem 1.25rem; color:#92400e; font-size:0.88rem; line-height:1.6; margin-bottom:2rem; text-align:left; }
+    .btns-exito { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="exito-wrap">
+    <div class="exito-card">
+        <div class="check-icon">🎉</div>
+        <div class="exito-titulo">¡Reserva registrada!</div>
+        <p class="exito-sub">Tu reserva fue guardada correctamente. Te contactaremos para coordinar el pago del depósito y confirmar tu estadía.</p>
+
+        <div class="detalle-card">
+            <div class="detalle-row">
+                <span class="detalle-label">N° de reserva</span>
+                <span class="detalle-val">#{{ reserva['id'] }}</span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">Cabaña</span>
+                <span class="detalle-val">{{ cabana.nombre }}</span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">Huésped</span>
+                <span class="detalle-val">{{ reserva['nombre'] }} {{ reserva['apellido'] }}</span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">DNI</span>
+                <span class="detalle-val">{{ reserva['dni'] }}</span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">Ingreso</span>
+                <span class="detalle-val">{{ reserva['fecha_ingreso'] }}</span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">Salida</span>
+                <span class="detalle-val">{{ reserva['fecha_salida'] }}</span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">Noches</span>
+                <span class="detalle-val">{{ reserva['noches'] }}</span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">Depósito (50%)</span>
+                <span class="detalle-val">
+                    {% if reserva['moneda'] == 'ARS' %}
+                        ${{ (reserva['deposito_usd'] * tipo_cambio)|int|string }} ARS
+                    {% else %}
+                        ${{ reserva['deposito_usd']|int }} USD
+                    {% endif %}
+                </span>
+            </div>
+            <div class="detalle-row">
+                <span class="detalle-label">Total</span>
+                <span class="detalle-val">
+                    {% if reserva['moneda'] == 'ARS' %}
+                        ${{ reserva['total_ars']|int|string }} ARS
+                    {% else %}
+                        ${{ reserva['total_usd']|int }} USD
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="alerta-deposito">
+            ⚠️ <strong>Importante:</strong> Tu reserva no estará confirmada hasta que se acredite el pago del depósito del 50%. Te contactaremos a la brevedad para coordinar el pago.
+        </div>
+
+        <div class="btns-exito">
+            <a href="/" class="btn btn-primary">Volver al inicio</a>
+            <a href="/reservar/lacho4" class="btn btn-outline">Hacer otra reserva</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
