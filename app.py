@@ -51,6 +51,16 @@ def get_db():
 
 def init_db():
     conn = get_db()
+    conn.execute('''CREATE TABLE IF NOT EXISTS resenas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cabana_id TEXT,
+        nombre TEXT NOT NULL,
+        email TEXT,
+        estrellas INTEGER NOT NULL,
+        texto TEXT NOT NULL,
+        aprobada INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )''')
     conn.execute('''CREATE TABLE IF NOT EXISTS reservas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         cabana_id TEXT NOT NULL,
@@ -109,7 +119,9 @@ def cabana_disponible(cabana_id, f_ingreso, f_salida, excluir_id=None):
 
 @app.route('/')
 def index():
-    return render_template('index.html', cabanas=CABANAS, resenas=RESENAS)
+    resenas_db = get_resenas()
+    resenas_show = resenas_db if resenas_db else RESENAS
+    return render_template('index.html', cabanas=CABANAS, resenas=resenas_show)
 
 
 @app.route('/cabana/<cabana_id>')
@@ -117,9 +129,10 @@ def detalle_cabana(cabana_id):
     if cabana_id not in CABANAS:
         return redirect(url_for('index'))
     cabana = CABANAS[cabana_id]
-    resenas = [r for r in RESENAS if r['cabana'] == cabana_id]
+    resenas_db = get_resenas(cabana_id)
+    resenas_show = resenas_db if resenas_db else [r for r in RESENAS if r['cabana'] == cabana_id]
     return render_template('cabana.html', cabana=cabana, cabana_id=cabana_id,
-                           resenas=resenas, tipo_cambio=TIPO_CAMBIO)
+                           resenas=resenas_show, tipo_cambio=TIPO_CAMBIO)
 
 
 @app.route('/reservar/<cabana_id>', methods=['GET', 'POST'])
@@ -191,6 +204,46 @@ def exito(reserva_id):
     cabana = CABANAS.get(reserva['cabana_id'], {})
     return render_template('exito.html', reserva=reserva, cabana=cabana, tipo_cambio=TIPO_CAMBIO)
 
+
+
+@app.route('/dejar-resena', methods=['POST'])
+def dejar_resena():
+    nombre   = request.form.get('nombre', '').strip()
+    email    = request.form.get('email', '').strip()
+    cabana_id = request.form.get('cabana_id', '').strip()
+    texto    = request.form.get('texto', '').strip()
+    try:
+        estrellas = int(request.form.get('estrellas', 5))
+        estrellas = max(1, min(5, estrellas))
+    except ValueError:
+        estrellas = 5
+
+    if not nombre or not texto:
+        return redirect(request.referrer or '/')
+
+    conn = get_db()
+    conn.execute(
+        'INSERT INTO resenas (cabana_id, nombre, email, estrellas, texto) VALUES (?,?,?,?,?)',
+        (cabana_id or None, nombre, email, estrellas, texto)
+    )
+    conn.commit()
+    conn.close()
+    return redirect((request.referrer or '/') + '?resena=ok')
+
+
+def get_resenas(cabana_id=None):
+    conn = get_db()
+    if cabana_id:
+        rows = conn.execute(
+            "SELECT * FROM resenas WHERE aprobada=1 AND cabana_id=? ORDER BY created_at DESC",
+            (cabana_id,)
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT * FROM resenas WHERE aprobada=1 ORDER BY created_at DESC"
+        ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
 
 # ── ADMIN ──────────────────────────────────────────────────────────────────────
 
@@ -283,6 +336,28 @@ def admin_notas(reserva_id):
     conn.close()
     return redirect(url_for('admin_panel'))
 
+
+
+@app.route('/admin/resenas')
+@admin_required
+def admin_resenas():
+    conn = get_db()
+    resenas = conn.execute("SELECT * FROM resenas ORDER BY created_at DESC").fetchall()
+    conn.close()
+    return render_template('admin_resenas.html', resenas=resenas, cabanas=CABANAS)
+
+
+@app.route('/admin/resena/<int:resena_id>/<accion>', methods=['POST'])
+@admin_required
+def admin_resena_accion(resena_id, accion):
+    conn = get_db()
+    if accion == 'aprobar':
+        conn.execute("UPDATE resenas SET aprobada=1 WHERE id=?", (resena_id,))
+    elif accion == 'rechazar':
+        conn.execute("DELETE FROM resenas WHERE id=?", (resena_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin_resenas'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -120,19 +120,108 @@
     </div>
 </div>
 
+
+<div class="section">
+    <div class="section-title">¿Cómo llegar?</div>
+    <p class="section-sub">Cabañas Intiyaco — Intiyaco, Córdoba, Argentina</p>
+    <div style="border-radius:16px;overflow:hidden;box-shadow:var(--sombra);margin-bottom:1rem;">
+        <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d26456.23!2d-64.7195!3d-31.9604!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zLTMxLjk2LCAtNjQuNzI!5e0!3m2!1ses!2sar!4v1"
+            width="100%" height="420" style="border:0;display:block;" allowfullscreen="" loading="lazy">
+        </iframe>
+    </div>
+    <div style="background:white;border-radius:12px;padding:1.25rem 1.5rem;box-shadow:var(--sombra);font-size:0.92rem;color:var(--gris);">
+        📍 Intiyaco, Córdoba, Argentina · A 10 metros de la referencia del mapa
+    </div>
+</div>
+
+<div class="section" style="background:white;border-radius:20px;padding:3rem 2rem;box-shadow:var(--sombra);margin-bottom:2rem;">
+    <div class="section-title">Lugares para visitar cerca</div>
+    <p class="section-sub">Explorá los atractivos turísticos de la zona</p>
+    <div class="lugares-grid">
+        <div class="lugar-card">
+            <div class="lugar-icon">🏔️</div>
+            <div class="lugar-nombre">La Cumbrecita</div>
+            <div class="lugar-dist">~15 km</div>
+            <div class="lugar-desc">Pintoresco pueblo de estilo alpino, declarado peatonal. Cascadas, senderismo y gastronomía típica de montaña.</div>
+        </div>
+        <div class="lugar-card">
+            <div class="lugar-icon">🌿</div>
+            <div class="lugar-nombre">Los Reartes</div>
+            <div class="lugar-dist">~8 km</div>
+            <div class="lugar-desc">Villa turística con el río Los Reartes, ideal para pesca, kayak y actividades al aire libre en plena naturaleza.</div>
+        </div>
+        <div class="lugar-card">
+            <div class="lugar-icon">🍺</div>
+            <div class="lugar-nombre">Villa General Belgrano</div>
+            <div class="lugar-dist">~20 km</div>
+            <div class="lugar-desc">Famosa por su arquitectura alemana, la Fiesta de la Cerveza y su ambiente cultural único en las sierras cordobesas.</div>
+        </div>
+    </div>
+</div>
+
 <div class="section">
     <div class="section-title">Lo que dicen nuestros huéspedes</div>
-    <p class="section-sub">Más de 100 familias ya disfrutaron de Cabañas Intiyaco</p>
+    <p class="section-sub">Experiencias reales de quienes ya nos visitaron</p>
+    {% if request.args.get('resena') == 'ok' %}
+    <div style="background:#d1e7dd;border:1px solid #a3cfbb;border-radius:10px;padding:1rem 1.25rem;color:#0a3622;margin-bottom:1.5rem;font-size:0.9rem;">
+        ✓ ¡Gracias por tu reseña! Será publicada una vez que la revisemos.
+    </div>
+    {% endif %}
     <div class="resenas-grid">
         {% for r in resenas %}
         <div class="resena-card">
-            <div class="resena-estrellas">{{ '⭐' * r.estrellas }}</div>
-            <div class="resena-texto">"{{ r.texto }}"</div>
-            <div class="resena-autor">— {{ r.nombre }}</div>
+            <div class="resena-estrellas">{{ '⭐' * r.estrellas if r.estrellas is defined else '⭐' * r['estrellas'] }}</div>
+            <div class="resena-texto">"{{ r.texto if r.texto is defined else r['texto'] }}"</div>
+            <div class="resena-autor">— {{ r.nombre if r.nombre is defined else r['nombre'] }}</div>
         </div>
         {% endfor %}
     </div>
+
+    <div style="background:white;border-radius:16px;padding:2rem;box-shadow:var(--sombra);margin-top:2.5rem;">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--verde-oscuro);margin-bottom:0.5rem;">¿Ya nos visitaste? Dejá tu reseña</h3>
+        <p style="color:var(--gris);font-size:0.88rem;margin-bottom:1.5rem;">Tu opinión nos ayuda a mejorar y a otros viajeros a elegir.</p>
+        <form method="POST" action="/dejar-resena">
+            <input type="hidden" name="cabana_id" value="">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div>
+                    <label style="display:block;font-size:0.85rem;font-weight:500;margin-bottom:0.35rem;">Tu nombre *</label>
+                    <input type="text" name="nombre" required style="width:100%;padding:0.65rem 1rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.9rem;font-family:'Inter',sans-serif;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:0.85rem;font-weight:500;margin-bottom:0.35rem;">Email (opcional)</label>
+                    <input type="email" name="email" style="width:100%;padding:0.65rem 1rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.9rem;font-family:'Inter',sans-serif;">
+                </div>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="display:block;font-size:0.85rem;font-weight:500;margin-bottom:0.35rem;">¿Qué cabaña visitaste?</label>
+                <select name="cabana_id" style="width:100%;padding:0.65rem 1rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.9rem;font-family:'Inter',sans-serif;background:white;">
+                    <option value="">General (ambas)</option>
+                    <option value="cedro">El Cedro (4 personas)</option>
+                    <option value="tabaquillo">El Tabaquillo (6 personas)</option>
+                </select>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="display:block;font-size:0.85rem;font-weight:500;margin-bottom:0.35rem;">Puntuación *</label>
+                <div style="display:flex;gap:0.5rem;">
+                    {% for i in [1,2,3,4,5] %}
+                    <label style="cursor:pointer;font-size:1.5rem;" title="{{ i }} estrellas">
+                        <input type="radio" name="estrellas" value="{{ i }}" {% if i == 5 %}checked{% endif %} style="display:none;">
+                        <span class="estrella-opt" data-val="{{ i }}">⭐</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+                <label style="display:block;font-size:0.85rem;font-weight:500;margin-bottom:0.35rem;">Tu comentario *</label>
+                <textarea name="texto" required rows="4" placeholder="Contanos tu experiencia..." style="width:100%;padding:0.65rem 1rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.9rem;font-family:'Inter',sans-serif;resize:vertical;"></textarea>
+            </div>
+            <button type="submit" style="background:var(--verde);color:white;border:none;padding:0.85rem 2rem;border-radius:30px;font-size:0.95rem;font-weight:600;cursor:pointer;width:100%;">Enviar reseña</button>
+        </form>
+    </div>
 </div>
+
+
 
 <div class="cta">
     <h2>¿Listo para tu próxima aventura?</h2>

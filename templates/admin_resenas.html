@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reseñas — Admin Cabañas Intiyaco</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --verde:#2d6a4f; --verde-claro:#52b788; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#f0f2f5; }
+        .topbar { background:var(--verde); color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .topbar h1 { font-size:1.2rem; font-weight:700; }
+        .topbar a { color:rgba(255,255,255,0.8); font-size:0.85rem; text-decoration:none; margin-left:1.5rem; }
+        .topbar a:hover { color:white; }
+        .content { max-width:1000px; margin:2rem auto; padding:0 1.5rem; }
+        .card { background:white; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); overflow:hidden; }
+        .card-header { padding:1.25rem 1.5rem; border-bottom:1px solid #f1f3f5; display:flex; justify-content:space-between; align-items:center; }
+        .card-header h2 { font-size:1rem; color:var(--verde); font-weight:700; }
+        .resena-row { padding:1.25rem 1.5rem; border-bottom:1px solid #f1f3f5; display:flex; gap:1.5rem; align-items:flex-start; }
+        .resena-row:last-child { border-bottom:none; }
+        .resena-stars { color:#f59e0b; font-size:1.1rem; white-space:nowrap; }
+        .resena-body { flex:1; }
+        .resena-nombre { font-weight:600; font-size:0.95rem; margin-bottom:0.25rem; }
+        .resena-cabana { font-size:0.78rem; color:var(--verde); margin-bottom:0.4rem; }
+        .resena-texto { font-size:0.9rem; color:#495057; font-style:italic; line-height:1.5; }
+        .resena-fecha { font-size:0.75rem; color:#adb5bd; margin-top:0.4rem; }
+        .resena-acciones { display:flex; gap:0.5rem; flex-shrink:0; }
+        .btn { padding:0.4rem 0.85rem; border:none; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer; text-decoration:none; }
+        .btn-aprobar { background:#d1e7dd; color:#0a3622; }
+        .btn-aprobar:hover { background:#a3cfbb; }
+        .btn-rechazar { background:#f8d7da; color:#58151c; }
+        .btn-rechazar:hover { background:#f1aeb5; }
+        .badge { padding:0.2rem 0.5rem; border-radius:20px; font-size:0.72rem; font-weight:600; }
+        .badge-aprobada { background:#d1e7dd; color:#0a3622; }
+        .badge-pendiente { background:#fff3cd; color:#856404; }
+        .empty { text-align:center; padding:3rem; color:#6c757d; }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <h1>⭐ Gestión de Reseñas</h1>
+    <div>
+        <a href="/admin">← Panel principal</a>
+        <a href="/admin/logout">Cerrar sesión</a>
+    </div>
+</div>
+<div class="content">
+    <div class="card">
+        <div class="card-header">
+            <h2>Todas las reseñas ({{ resenas|length }})</h2>
+        </div>
+        {% if resenas %}
+            {% for r in resenas %}
+            <div class="resena-row">
+                <div class="resena-stars">{{ '⭐' * r['estrellas'] }}</div>
+                <div class="resena-body">
+                    <div class="resena-nombre">{{ r['nombre'] }}
+                        {% if r['aprobada'] %}
+                        <span class="badge badge-aprobada">Aprobada</span>
+                        {% else %}
+                        <span class="badge badge-pendiente">Pendiente</span>
+                        {% endif %}
+                    </div>
+                    {% if r['cabana_id'] %}
+                    <div class="resena-cabana">{{ cabanas[r['cabana_id']]['nombre'] if r['cabana_id'] in cabanas else r['cabana_id'] }}</div>
+                    {% endif %}
+                    <div class="resena-texto">"{{ r['texto'] }}"</div>
+                    <div class="resena-fecha">{{ r['created_at'] }}</div>
+                </div>
+                <div class="resena-acciones">
+                    {% if not r['aprobada'] %}
+                    <form method="POST" action="/admin/resena/{{ r['id'] }}/aprobar">
+                        <button type="submit" class="btn btn-aprobar">✓ Aprobar</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="/admin/resena/{{ r['id'] }}/rechazar" onsubmit="return confirm('¿Eliminar esta reseña?')">
+                        <button type="submit" class="btn btn-rechazar">✗ Eliminar</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty">No hay reseñas todavía</div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

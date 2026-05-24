@@ -78,6 +78,44 @@
             {% endfor %}
         </div>
         {% endif %}
+
+        {% if request.args.get('resena') == 'ok' %}
+        <div style="background:#d1e7dd;border:1px solid #a3cfbb;border-radius:10px;padding:1rem 1.25rem;color:#0a3622;margin-bottom:1.5rem;font-size:0.9rem;">
+            ✓ ¡Gracias por tu reseña! Será publicada una vez que la revisemos.
+        </div>
+        {% endif %}
+        <div style="background:#f8fffe;border:1px solid #c3e6cb;border-radius:12px;padding:1.5rem;margin-top:1.5rem;">
+            <h3 style="font-size:1.1rem;color:var(--verde-oscuro);margin-bottom:1rem;">¿Ya nos visitaste? Dejá tu reseña</h3>
+            <form method="POST" action="/dejar-resena">
+                <input type="hidden" name="cabana_id" value="{{ cabana_id }}">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+                    <div>
+                        <label style="display:block;font-size:0.82rem;font-weight:500;margin-bottom:0.3rem;">Tu nombre *</label>
+                        <input type="text" name="nombre" required style="width:100%;padding:0.6rem 0.85rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.88rem;font-family:'Inter',sans-serif;">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.82rem;font-weight:500;margin-bottom:0.3rem;">Email (opcional)</label>
+                        <input type="email" name="email" style="width:100%;padding:0.6rem 0.85rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.88rem;font-family:'Inter',sans-serif;">
+                    </div>
+                </div>
+                <div style="margin-bottom:0.75rem;">
+                    <label style="display:block;font-size:0.82rem;font-weight:500;margin-bottom:0.3rem;">Puntuación *</label>
+                    <select name="estrellas" style="padding:0.55rem 0.85rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.88rem;background:white;">
+                        <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                        <option value="4">⭐⭐⭐⭐ Muy bueno</option>
+                        <option value="3">⭐⭐⭐ Bueno</option>
+                        <option value="2">⭐⭐ Regular</option>
+                        <option value="1">⭐ Malo</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;font-size:0.82rem;font-weight:500;margin-bottom:0.3rem;">Tu comentario *</label>
+                    <textarea name="texto" required rows="3" placeholder="Contanos tu experiencia..." style="width:100%;padding:0.6rem 0.85rem;border:1.5px solid #dee2e6;border-radius:8px;font-size:0.88rem;font-family:'Inter',sans-serif;resize:vertical;"></textarea>
+                </div>
+                <button type="submit" style="background:var(--verde);color:white;border:none;padding:0.75rem 1.5rem;border-radius:25px;font-size:0.9rem;font-weight:600;cursor:pointer;width:100%;">Enviar reseña</button>
+            </form>
+        </div>
+
     </div>
 
     <div>
