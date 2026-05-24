@@ -220,19 +220,13 @@
                     <td>
                         <div class="acciones">
                             {% if r['estado'] == 'pendiente' %}
-                            <form method="POST" action="/admin/accion/{{ r['id'] }}/confirmar" style="display:inline">
-                                <button type="submit" class="btn-accion btn-confirmar">✓ Confirmar</button>
-                            </form>
+                            <button type="button" class="btn-accion btn-confirmar" onclick="document.getElementById('form-confirmar-{{ r['id'] }}').submit()">✓ Confirmar</button>
                             {% endif %}
                             {% if r['estado'] != 'cancelada' %}
-                            <form method="POST" action="/admin/accion/{{ r['id'] }}/cancelar" style="display:inline" onsubmit="return confirm('¿Cancelar esta reserva?')">
-                                <button type="submit" class="btn-accion btn-cancelar">✗ Cancelar</button>
-                            </form>
+                            <button type="button" class="btn-accion btn-cancelar" onclick="if(confirm('¿Cancelar esta reserva?')) document.getElementById('form-cancelar-{{ r['id'] }}').submit()">✗ Cancelar</button>
                             {% endif %}
-                            {% if not r['pago_deposito'] %}
-                            <form method="POST" action="/admin/accion/{{ r['id'] }}/pago_deposito" style="display:inline">
-                                <button type="submit" class="btn-accion btn-deposito">💰 Dep. pagado</button>
-                            </form>
+                            {% if not r['pago_deposito'] and r['estado'] != 'cancelada' %}
+                            <button type="button" class="btn-accion btn-deposito" onclick="document.getElementById('form-deposito-{{ r['id'] }}').submit()">💰 Dep. pagado</button>
                             {% endif %}
                         </div>
                     </td>
@@ -240,10 +234,10 @@
                         {% if r['notas'] %}
                         <div class="notas-text">{{ r['notas'] }}</div>
                         {% endif %}
-                        <form method="POST" action="/admin/notas/{{ r['id'] }}" class="notas-form">
-                            <input type="text" name="notas" placeholder="Agregar nota..." value="{{ r['notas'] or '' }}">
-                            <button type="submit">💾</button>
-                        </form>
+                        <div class="notas-form">
+                            <input type="text" id="notas-input-{{ r['id'] }}" placeholder="Agregar nota..." value="{{ r['notas'] or '' }}">
+                            <button type="button" onclick="guardarNota({{ r['id'] }})">💾</button>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -253,6 +247,16 @@
         <div class="empty">📋 No hay reservas para mostrar</div>
         {% endif %}
     </div>
+
+    <!-- Formularios fuera de la tabla para evitar bugs de browser -->
+    {% for r in reservas %}
+    <form id="form-confirmar-{{ r['id'] }}" method="POST" action="/admin/accion/{{ r['id'] }}/confirmar" style="display:none"></form>
+    <form id="form-cancelar-{{ r['id'] }}" method="POST" action="/admin/accion/{{ r['id'] }}/cancelar" style="display:none"></form>
+    <form id="form-deposito-{{ r['id'] }}" method="POST" action="/admin/accion/{{ r['id'] }}/pago_deposito" style="display:none"></form>
+    <form id="form-notas-{{ r['id'] }}" method="POST" action="/admin/notas/{{ r['id'] }}" style="display:none">
+        <input type="text" name="notas" id="notas-val-{{ r['id'] }}">
+    </form>
+    {% endfor %}
 </div>
 
 <script>
@@ -329,6 +333,12 @@ function renderCalendario() {
     }
 
     document.getElementById('cal-grid').innerHTML = html;
+}
+
+function guardarNota(id) {
+    var val = document.getElementById('notas-input-' + id).value;
+    document.getElementById('notas-val-' + id).value = val;
+    document.getElementById('form-notas-' + id).submit();
 }
 
 document.addEventListener('DOMContentLoaded', function() {

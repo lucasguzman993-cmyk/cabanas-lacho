@@ -29,8 +29,12 @@
 
     @media(max-width:768px) {
         .reservar-wrap { grid-template-columns:1fr; }
-        .resumen-card { position:static; }
+        .resumen-card { display:none; }
         .form-row { grid-template-columns:1fr; }
+        #resumen-mobile { display:block !important; }
+    }
+    @media(min-width:769px) {
+        #resumen-mobile { display:none !important; }
     }
 </style>
 {% endblock %}
@@ -88,6 +92,22 @@
                 </div>
                 <input type="hidden" name="moneda" id="moneda" value="USD">
             </div>
+            <!-- RESUMEN MOBILE - visible solo en mobile -->
+            <div id="resumen-mobile" style="display:none;background:#f0fdf4;border:2px solid var(--verde-claro);border-radius:12px;padding:1.25rem;margin-bottom:1rem;">
+                <div style="font-weight:700;font-size:0.9rem;color:var(--verde-oscuro);margin-bottom:0.75rem;">📋 Resumen de tu reserva</div>
+                <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.4rem;">
+                    <span style="color:var(--gris);">Noches</span>
+                    <span id="mob-noches" style="font-weight:600;">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:0.4rem;">
+                    <span style="color:var(--gris);">Depósito (50%)</span>
+                    <span id="mob-deposito" style="font-weight:600;color:var(--madera);">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:1rem;border-top:1px solid #c3e6cb;padding-top:0.6rem;margin-top:0.4rem;">
+                    <span style="font-weight:700;color:var(--verde-oscuro);">Total</span>
+                    <span id="mob-total" style="font-weight:800;color:var(--verde);font-size:1.1rem;">—</span>
+                </div>
+            </div>
             <button type="submit" class="btn-submit">Confirmar Reserva →</button>
         </form>
     </div>
@@ -129,16 +149,22 @@ function calcularPrecio() {
     var totalUSD = noches * precioPorNoche;
     var depUSD = totalUSD * 0.5;
     document.getElementById('res-noches').textContent = noches + ' noche' + (noches > 1 ? 's' : '');
+    document.getElementById('mob-noches').textContent = noches + ' noche' + (noches > 1 ? 's' : '');
+    document.getElementById('resumen-mobile').style.display = 'block';
     if (monedaActual === 'USD') {
         document.getElementById('res-deposito').textContent = '$' + depUSD.toFixed(0) + ' USD';
         document.getElementById('res-total').textContent = '$' + totalUSD.toFixed(0) + ' USD';
         document.getElementById('precio-display').textContent = '$' + totalUSD.toFixed(0) + ' USD';
+        document.getElementById('mob-deposito').textContent = '$' + depUSD.toFixed(0) + ' USD';
+        document.getElementById('mob-total').textContent = '$' + totalUSD.toFixed(0) + ' USD';
     } else {
         var totalARS = totalUSD * tipoCambio;
         var depARS = depUSD * tipoCambio;
         document.getElementById('res-deposito').textContent = '$' + Math.round(depARS).toLocaleString() + ' ARS';
         document.getElementById('res-total').textContent = '$' + Math.round(totalARS).toLocaleString() + ' ARS';
         document.getElementById('precio-display').textContent = '$' + Math.round(totalARS).toLocaleString() + ' ARS';
+        document.getElementById('mob-deposito').textContent = '$' + Math.round(depARS).toLocaleString() + ' ARS';
+        document.getElementById('mob-total').textContent = '$' + Math.round(totalARS).toLocaleString() + ' ARS';
     }
 }
 
